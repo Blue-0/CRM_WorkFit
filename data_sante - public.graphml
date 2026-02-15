@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:java="http://www.yworks.com/xml/yfiles-common/1.0/java" xmlns:sys="http://www.yworks.com/xml/yfiles-common/markup/primitives/2.0" xmlns:x="http://www.yworks.com/xml/yfiles-common/markup/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+	<key for="node" id="nodegraph" yfiles.type="nodegraphics"/>
+	<key for="edge" id="edgegraph" yfiles.type="edgegraphics"/>
+	<graph edgedefault="directed" id="G">
+		<node id="entity0">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="314" width="135.0" x="281" y="40"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="131" x="0" y="4">daily_diet</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="264" width="131" x="2" y="31.66796875">id
+user_id
+week_number
+date
+breakfast_rating
+snack_am_rating
+lunch_rating
+snack_pm_rating
+dinner_rating
+hydration_rating
+objectif_text
+craquage_exces
+feeling
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity1">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="314" width="120.0" x="281" y="424"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="116" x="0" y="4">daily_sport_sleep</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="264" width="116" x="2" y="31.66796875">id
+user_id
+week_number
+date
+workout_desc
+duration_min
+steps
+sleep_hours
+bedtime
+wake_time
+nap_start
+nap_end
+feeling
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity2">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="154" width="111.0" x="40" y="120"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="107" x="0" y="4">diet_items</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="104" width="107" x="2" y="31.66796875">id
+daily_diet_id
+meal_type
+item_text
+sort_order
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity3">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="394" width="204.12" x="281" y="808"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="167" x="0" y="4">weekly_bilans</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="344" width="167" x="2" y="31.66796875">id
+user_id
+week_number
+total_sport_time
+total_sport_min
+avg_sport_min_per_day
+total_steps
+avg_steps_per_day
+rating_petits_dejeuners
+rating_collations_matin
+rating_dejeuners
+rating_collations_aprem
+rating_diners
+rating_hydratation
+avg_sleep_hours
+weight_kg
+bilan_text
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity4">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="334" width="140.0" x="281" y="1272"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="136" x="0" y="4">body_measurements</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="284" width="136" x="2" y="31.66796875">id
+user_id
+week_number
+date
+weight_kg
+shoulders_cm
+chest_cm
+waist_cm
+abs_cm
+hips_cm
+bicep_left_cm
+bicep_right_cm
+thigh_left_cm
+thigh_right_cm
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity5">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="114" width="100.0" x="522" y="748"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="96" x="0" y="4">users</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="64" width="96" x="2" y="31.66796875">id
+email
+full_name
+created_at						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<node id="entity6">
+			<data key="nodegraph">
+				<y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
+					<y:Geometry height="354" width="204.12" x="30" y="730"/>
+					<y:Fill color="#202020" transparent="false"/>
+					<y:BorderStyle color="#C4C4C4" type="line" width="1.0"/>
+					<y:NodeLabel alignment="center" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.name" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="internal" modelPosition="t" backgroundColor="#202020" textColor="#FFFFFF" visible="true" horizontalTextPosition="center" iconTextGap="4" height="22" width="167" x="0" y="4">weekly_stats_view</y:NodeLabel>
+					<y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Courier" fontSize="12" fontStyle="plain" hasLineColor="false" modelName="custom" modelPosition="t" backgroundColor="#404040" textColor="#C4C4C4" visible="true" horizontalTextPosition="center" iconTextGap="4" height="324" width="167" x="2" y="31.66796875">user_id
+week_number
+weight_kg
+total_steps
+avg_sleep_hours
+total_sport_min
+avg_steps_per_day
+avg_sport_min_per_day
+rating_petits_dejeuners
+rating_collations_matin
+rating_dejeuners
+rating_collations_aprem
+rating_diners
+rating_hydratation
+bilan_text
+days_tracked						<y:LabelModel>
+							<y:ErdAttributesNodeLabelModel/>
+						</y:LabelModel>
+						<y:ModelParameter>
+							<y:ErdAttributesNodeLabelModelParameter/>
+						</y:ModelParameter>
+					</y:NodeLabel>
+				</y:GenericNode>
+			</data>
+		</node>
+		<edge id="edge0-0" source="entity0" target="entity5">
+			<data key="edgegraph">
+				<y:PolyLineEdge>
+					<y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+					<y:LineStyle color="#000000" type="dashed" width="1.0"/>
+					<y:Arrows source="white_diamond" target="circle"/>
+					<y:BendStyle smoothed="false"/>
+				</y:PolyLineEdge>
+			</data>
+		</edge>
+		<edge id="edge1-0" source="entity1" target="entity5">
+			<data key="edgegraph">
+				<y:PolyLineEdge>
+					<y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+					<y:LineStyle color="#000000" type="dashed" width="1.0"/>
+					<y:Arrows source="white_diamond" target="circle"/>
+					<y:BendStyle smoothed="false"/>
+				</y:PolyLineEdge>
+			</data>
+		</edge>
+		<edge id="edge2-0" source="entity2" target="entity0">
+			<data key="edgegraph">
+				<y:PolyLineEdge>
+					<y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+					<y:LineStyle color="#000000" type="dashed" width="1.0"/>
+					<y:Arrows source="white_diamond" target="circle"/>
+					<y:BendStyle smoothed="false"/>
+				</y:PolyLineEdge>
+			</data>
+		</edge>
+		<edge id="edge3-0" source="entity3" target="entity5">
+			<data key="edgegraph">
+				<y:PolyLineEdge>
+					<y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+					<y:LineStyle color="#000000" type="dashed" width="1.0"/>
+					<y:Arrows source="white_diamond" target="circle"/>
+					<y:BendStyle smoothed="false"/>
+				</y:PolyLineEdge>
+			</data>
+		</edge>
+		<edge id="edge4-0" source="entity4" target="entity5">
+			<data key="edgegraph">
+				<y:PolyLineEdge>
+					<y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+					<y:LineStyle color="#000000" type="dashed" width="1.0"/>
+					<y:Arrows source="white_diamond" target="circle"/>
+					<y:BendStyle smoothed="false"/>
+				</y:PolyLineEdge>
+			</data>
+		</edge>
+	</graph>
+</graphml>

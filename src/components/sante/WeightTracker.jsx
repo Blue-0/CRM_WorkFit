@@ -3,14 +3,16 @@ import ReactApexChart from 'react-apexcharts';
 
 const API_URL = 'http://localhost:3001';
 
-const WeightTracker = () => {
+const WeightTracker = ({ userId }) => {
   const [weightData, setWeightData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWeightHistory = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health/weight-history`);
+        const response = await fetch(`${API_URL}/api/health/weight-history`, {
+          headers: { 'x-user-id': userId }
+        });
         if (response.ok) {
           const data = await response.json();
           setWeightData(data);
@@ -21,8 +23,8 @@ const WeightTracker = () => {
         setLoading(false);
       }
     };
-    fetchWeightHistory();
-  }, []);
+    if (userId) fetchWeightHistory();
+  }, [userId]);
 
   // Préparer les données pour le graphique
   const categories = weightData.map(d => `S${d.week_number}`);

@@ -143,10 +143,10 @@ const MasterLayout = ({ children }) => {
                     }
                   >
                     <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                    AI
+                    Sport
                   </NavLink>
                 </li>
-                <li>
+{/*                 <li>
                   <NavLink
                     to='/index-2'
                     className={(navData) =>
@@ -256,219 +256,174 @@ const MasterLayout = ({ children }) => {
                     Finance & Banking
                   </NavLink>
                 </li>
-              </ul>
-            </li>
-
-            <li className='sidebar-menu-group-title'>Application</li>
-            <li>
-              <NavLink
-                to='/email'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='mage:email' className='menu-icon' />
-                <span>Email</span>
-              </NavLink>
+ */}
+               </ul>
             </li>
             <li>
-              <NavLink
-                to='/chat-message'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='bi:chat-dots' className='menu-icon' />
-                <span>Chat</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/calendar-main'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='solar:calendar-outline' className='menu-icon' />
-                <span>Calendar</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/kanban'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='material-symbols:map-outline'
-                  className='menu-icon'
-                />
-                <span>Kanban</span>
-              </NavLink>
-            </li>
-
-            {/* Invoice Dropdown */}
             <li className='dropdown'>
               <Link to='#'>
-                <Icon icon='hugeicons:invoice-03' className='menu-icon' />
-                <span>Invoice</span>
+                <Icon icon='mdi:heart-pulse' className='menu-icon' />
+                <span>Santé</span>
               </Link>
               <ul className='sidebar-submenu'>
                 <li>
                   <NavLink
-                    to='/invoice-list'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/daily-diet'
+                    className={(navData) => navData.isActive ? "active-page" : ""}
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    List
+                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />
+                    Alimentation
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/invoice-preview'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/daily-sport-sleep'
+                    className={(navData) => navData.isActive ? "active-page" : ""}
                   >
                     <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Preview
+                    Sport & Sommeil
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/invoice-add'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/weekly-bilans'
+                    className={(navData) => navData.isActive ? "active-page" : ""}
                   >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Add new
+                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />
+                    Bilans Hebdo
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/invoice-edit'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/body-measurements-page'
+                    className={(navData) => navData.isActive ? "active-page" : ""}
                   >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Edit
+                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
+                    Mensurations
                   </NavLink>
                 </li>
               </ul>
             </li>
-
-            {/* Ai Application Dropdown */}
             <li className='dropdown'>
               <Link to='#'>
-                <i className='ri-robot-2-line mr-10' />
-
-                <span>Ai Application</span>
+                <Icon icon='heroicons:squares-2x2' className='menu-icon' />
+                <span>Application</span>
               </Link>
               <ul className='sidebar-submenu'>
                 <li>
                   <NavLink
-                    to='/text-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/email'
+                    className={(navData) => (navData.isActive ? "active-page" : "")}
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Text Generator
+                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                    Email
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/code-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/chat-message'
+                    className={(navData) => (navData.isActive ? "active-page" : "")}
                   >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Code Generator
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                    Chat
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/image-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/calendar-main'
+                    className={(navData) => (navData.isActive ? "active-page" : "")}
                   >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Image Generator
+                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />
+                    Calendar
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/voice-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
+                    to='/kanban'
+                    className={(navData) => (navData.isActive ? "active-page" : "")}
                   >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Voice Generator
+                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
+                    Kanban
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to='/video-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Video Generator
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
 
-            {/* Crypto Currency Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <i className='ri-btc-line mr-10' />
-                <span>Crypto Currency</span>
-              </Link>
-              <ul className='sidebar-submenu'>
+                {/* Invoice (Flattened) */}
+                <li className='sidebar-menu-group-title text-xs mt-3'>Invoice</li>
                 <li>
-                  <NavLink
-                    to='/wallet'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Wallet
+                  <NavLink to='/invoice-list'>
+                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' /> List
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink
-                    to='/marketplace'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Marketplace
+                  <NavLink to='/invoice-preview'>
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' /> Preview
+                  </NavLink>
+                </li>
+
+                {/* AI Application (Flattened) */}
+                <li className='sidebar-menu-group-title text-xs mt-3'>AI Application</li>
+                <li>
+                  <NavLink to='/text-generator'>
+                    <i className='ri-circle-fill circle-icon text-info-main w-auto' /> Text Generator
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink
-                    to='/marketplace-details'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Marketplace Details
+                  <NavLink to='/code-generator'>
+                    <i className='ri-circle-fill circle-icon text-success-main w-auto' /> Code Generator
+                  </NavLink>
+                </li>
+
+                {/* Crypto (Flattened) */}
+                <li className='sidebar-menu-group-title text-xs mt-3'>Crypto Currency</li>
+                <li>
+                  <NavLink to='/wallet'>
+                    <i className='ri-circle-fill circle-icon text-purple w-auto' /> Wallet
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink
-                    to='/portfolio'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Portfolios
+                  <NavLink to='/marketplace'>
+                    <i className='ri-circle-fill circle-icon text-lilac-600 w-auto' /> Marketplace
+                  </NavLink>
+                </li>
+
+                {/* Authentication */}
+                <li className='sidebar-menu-group-title text-xs mt-3'>Authentication</li>
+                <li>
+                  <NavLink to='/sign-in'>
+                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' /> Sign In
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to='/sign-up'>
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' /> Sign Up
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to='/forgot-password'>
+                    <i className='ri-circle-fill circle-icon text-info-main w-auto' /> Forgot Password
+                  </NavLink>
+                </li>
+
+                {/* Others */}
+                <li className='sidebar-menu-group-title text-xs mt-3'>Other Pages</li>
+                <li>
+                  <NavLink to='/gallery-grid'>
+                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' /> Gallery
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to='/pricing'>
+                    <i className='ri-circle-fill circle-icon text-success-main w-auto' /> Pricing
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to='/blog'>
+                    <i className='ri-circle-fill circle-icon text-purple w-auto' /> Blog
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to='/faq'>
+                    <i className='ri-circle-fill circle-icon text-lilac-600 w-auto' /> FAQ
                   </NavLink>
                 </li>
               </ul>
@@ -948,247 +903,6 @@ const MasterLayout = ({ children }) => {
               </ul>
             </li>
 
-            <li className='sidebar-menu-group-title'>Application</li>
-
-            {/* Authentication Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon icon='simple-line-icons:vector' className='menu-icon' />
-                <span>Authentication</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/sign-in'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Sign In
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/sign-up'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Sign Up
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/forgot-password'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Forgot Password
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            {/* gallery */}
-
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='flowbite:users-group-outline'
-                  className='menu-icon'
-                />
-                <span>Gallery</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/gallery-grid'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Gallery Grid
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/gallery'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Gallery Grid Desc
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/gallery-masonry'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Gallery Grid
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/gallery-hover'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Gallery Hover Effect
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <NavLink
-                to='/pricing'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='hugeicons:money-send-square'
-                  className='menu-icon'
-                />
-                <span>Pricing</span>
-              </NavLink>
-            </li>
-
-            {/* Blog */}
-
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='flowbite:users-group-outline'
-                  className='menu-icon'
-                />
-                <span>Blog</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/blog'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Blog
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/blog-details'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Blog Details
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/add-blog'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Add Blog
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <NavLink
-                to='/testimonials'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='mage:message-question-mark-round'
-                  className='menu-icon'
-                />
-                <span>Testimonials</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/faq'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='mage:message-question-mark-round'
-                  className='menu-icon'
-                />
-                <span>FAQs.</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/error'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='streamline:straight-face' className='menu-icon' />
-                <span>404</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/terms-condition'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='octicon:info-24' className='menu-icon' />
-                <span>Terms &amp; Conditions</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/coming-soon'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-rocket-line menu-icon'></i>
-                <span>Coming Soon</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/access-denied'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-folder-lock-line menu-icon'></i>
-                <span>Access Denied</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/maintenance'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-hammer-line menu-icon'></i>
-                <span>Maintenance</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/blank-page'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-checkbox-multiple-blank-line menu-icon'></i>
-                <span>Blank Page</span>
-              </NavLink>
-            </li>
 
             {/* Settings Dropdown */}
             <li className='dropdown'>
@@ -1278,6 +992,7 @@ const MasterLayout = ({ children }) => {
                   </NavLink>
                 </li>
               </ul>
+            </li>
             </li>
           </ul>
         </div>

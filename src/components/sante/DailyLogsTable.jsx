@@ -3,14 +3,16 @@ import { Icon } from "@iconify/react";
 
 const API_URL = 'http://localhost:3001';
 
-const DailyLogsTable = () => {
+const DailyLogsTable = ({ userId }) => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health/daily-logs`);
+        const response = await fetch(`${API_URL}/api/health/daily-logs`, {
+          headers: { 'x-user-id': userId }
+        });
         if (response.ok) {
           const data = await response.json();
           setLogs(data);
@@ -21,8 +23,8 @@ const DailyLogsTable = () => {
         setLoading(false);
       }
     };
-    fetchLogs();
-  }, []);
+    if (userId) fetchLogs();
+  }, [userId]);
 
   // Données par défaut si pas de données API
   const defaultLogs = [
@@ -51,8 +53,9 @@ const DailyLogsTable = () => {
   };
 
   const getSleepIcon = (hours) => {
-    if (hours >= 7.5) return { icon: 'mdi:sleep', color: 'text-success-main' };
-    if (hours >= 6) return { icon: 'mdi:sleep', color: 'text-warning-main' };
+    const h = parseFloat(hours) || 0;
+    if (h >= 7.5) return { icon: 'mdi:sleep', color: 'text-success-main' };
+    if (h >= 6) return { icon: 'mdi:sleep', color: 'text-warning-main' };
     return { icon: 'mdi:sleep-off', color: 'text-danger-main' };
   };
 
@@ -99,7 +102,7 @@ const DailyLogsTable = () => {
                       <td className='px-24 py-16'>
                         <div className='d-flex align-items-center gap-2'>
                           <Icon icon={sleepInfo.icon} className={`text-xl ${sleepInfo.color}`} />
-                          <span className='fw-medium'>{log.sleep_hours?.toFixed(1)}h</span>
+                          <span className='fw-medium'>{parseFloat(log.sleep_hours || 0).toFixed(1)}h</span>
                         </div>
                       </td>
                       <td className='px-24 py-16'>

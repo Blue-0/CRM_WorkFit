@@ -3,14 +3,16 @@ import ReactApexChart from 'react-apexcharts';
 
 const API_URL = 'http://localhost:3001';
 
-const TrainingDistribution = () => {
+const TrainingDistribution = ({ userId }) => {
   const [trainingData, setTrainingData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTrainingDistribution = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health/training-distribution`);
+        const response = await fetch(`${API_URL}/api/health/training-distribution`, {
+          headers: { 'x-user-id': userId }
+        });
         if (response.ok) {
           const data = await response.json();
           setTrainingData(data);
@@ -21,8 +23,8 @@ const TrainingDistribution = () => {
         setLoading(false);
       }
     };
-    fetchTrainingDistribution();
-  }, []);
+    if (userId) fetchTrainingDistribution();
+  }, [userId]);
 
   // Données par défaut si pas de données API
   const defaultData = [

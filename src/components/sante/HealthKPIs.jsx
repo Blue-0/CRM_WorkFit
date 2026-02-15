@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 
 const API_URL = 'http://localhost:3001';
 
-const HealthKPIs = () => {
+const HealthKPIs = ({ userId }) => {
   const [kpis, setKpis] = useState({
     avg_weight: 0,
     total_steps: 0,
@@ -15,7 +15,9 @@ const HealthKPIs = () => {
   useEffect(() => {
     const fetchKPIs = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health/kpis`);
+        const response = await fetch(`${API_URL}/api/health/kpis`, {
+          headers: { 'x-user-id': userId }
+        });
         if (response.ok) {
           const data = await response.json();
           setKpis(data);
@@ -26,13 +28,13 @@ const HealthKPIs = () => {
         setLoading(false);
       }
     };
-    fetchKPIs();
-  }, []);
+    if (userId) fetchKPIs();
+  }, [userId]);
 
   const kpiCards = [
     {
       label: 'Poids Actuel',
-      value: `${kpis.avg_weight?.toFixed(1) || '0'} kg`,
+      value: `${parseFloat(kpis.avg_weight || 0).toFixed(1)} kg`,
       icon: 'healthicons:weight',
       bgColor: 'bg-success-main',
       gradientClass: 'bg-gradient-start-4',
@@ -41,7 +43,7 @@ const HealthKPIs = () => {
     },
     {
       label: 'Total Pas (Semaine)',
-      value: kpis.total_steps?.toLocaleString() || '0',
+      value: parseInt(kpis.total_steps || 0).toLocaleString(),
       icon: 'mdi:walk',
       bgColor: 'bg-cyan',
       gradientClass: 'bg-gradient-start-1',
@@ -50,7 +52,7 @@ const HealthKPIs = () => {
     },
     {
       label: 'Sommeil Moyen',
-      value: `${kpis.avg_sleep_hours?.toFixed(1) || '0'} h`,
+      value: `${parseFloat(kpis.avg_sleep_hours || 0).toFixed(1)} h`,
       icon: 'mdi:sleep',
       bgColor: 'bg-purple',
       gradientClass: 'bg-gradient-start-2',
@@ -59,7 +61,7 @@ const HealthKPIs = () => {
     },
     {
       label: 'Sport (Semaine)',
-      value: `${kpis.total_sport_min || 0} min`,
+      value: `${parseInt(kpis.total_sport_min || 0)} min`,
       icon: 'mdi:dumbbell',
       bgColor: 'bg-warning-main',
       gradientClass: 'bg-gradient-start-3',
