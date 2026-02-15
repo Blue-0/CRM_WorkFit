@@ -1,0 +1,53 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workfit-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_started
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: workfit-api
+    restart: unless-stopped
+    environment:
+      API_PORT: 3001
+      FRONTEND_URL: http://localhost:8080
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: workfit
+      DB_USER: workfit
+      DB_PASSWORD: workfit
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: workfit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: workfit
+      POSTGRES_USER: workfit
+      POSTGRES_PASSWORD: workfit
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workfit -d workfit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
