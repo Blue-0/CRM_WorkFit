@@ -8,11 +8,12 @@ services:
     ports:
       - "80:80"
     environment:
-      # In production, Nginx proxies /api, so we use relative path
       VITE_API_URL: ""
     depends_on:
       api:
         condition: service_started
+    networks:
+      - workfit-network
 
   api:
     build:
@@ -33,6 +34,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - workfit-network
 
   db:
     image: postgres:16-alpine
@@ -51,6 +54,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - workfit-network
 
 volumes:
   postgres_data:
+
+networks:
+  workfit-network:
+    driver: bridge
