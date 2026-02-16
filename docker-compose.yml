@@ -22,37 +22,13 @@ services:
     environment:
       API_PORT: 3001
       FRONTEND_URL: ${FRONTEND_URL:-https://workfit.bluedyso.fr}
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-workfit}
-      DB_USER: ${DB_USER:-workfit}
-      DB_PASSWORD: ${DB_PASSWORD:-workfit}
-    depends_on:
-      db:
-        condition: service_healthy
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     networks:
       - workfit-net
-
-  db:
-    image: postgres:16-alpine
-    container_name: workfit-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-workfit}
-      POSTGRES_USER: ${DB_USER:-workfit}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-workfit}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-workfit} -d ${DB_NAME:-workfit}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - workfit-net
-
-volumes:
-  postgres_data:
 
 networks:
   workfit-net:
