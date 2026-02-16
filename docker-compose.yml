@@ -6,7 +6,7 @@ services:
     container_name: workfit-web
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80"
     depends_on:
       api:
         condition: service_started
