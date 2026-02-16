@@ -22,9 +22,7 @@ services:
     restart: unless-stopped
     environment:
       API_PORT: 3001
-      # In production, the frontend URL might need to be the actual domain
-      # or left as is if CORS is permissive or handled by Nginx
-      FRONTEND_URL: http://localhost:80
+      FRONTEND_URL: ${FRONTEND_URL:-https://workfit.bluedyso.fr}
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: workfit
