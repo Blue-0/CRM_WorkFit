@@ -1,15 +1,13 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
+
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
 
-COPY . .
-RUN npm run build
+RUN npm install
 
-FROM nginx:1.27-alpine
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+# COPY . . (Code will be mounted via volume in docker-compose)
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host"]

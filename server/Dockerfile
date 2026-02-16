@@ -1,10 +1,13 @@
 FROM node:20-alpine
+
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
 
-COPY . .
+RUN npm install
+
+# COPY . . (Code will be mounted via volume in docker-compose)
 
 EXPOSE 3001
-CMD ["npm", "start"]
+
+CMD ["npm", "run", "dev"]

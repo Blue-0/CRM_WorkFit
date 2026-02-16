@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from "@iconify/react";
 
-const API_URL = 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const HealthKPIs = ({ userId }) => {
   const [kpis, setKpis] = useState({
