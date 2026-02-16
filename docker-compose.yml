@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: workfit-web
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       api:
         condition: service_started
