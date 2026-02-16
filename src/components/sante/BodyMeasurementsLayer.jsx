@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from "@iconify/react";
 
-const API_URL = 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const MEASUREMENT_FIELDS = [
   { key: 'weight_kg', label: 'Poids', unit: 'kg', icon: 'healthicons:weight', bgColor: 'bg-primary-600' },

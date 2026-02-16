@@ -4,6 +4,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    host: true, // Allow access from outside the container
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://workfit-api:3001', // Proxy API requests to backend
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

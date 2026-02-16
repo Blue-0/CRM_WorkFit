@@ -2,14 +2,17 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: workfit-web
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "5173:5173"
     environment:
-      # In production, Nginx proxies /api, so we use relative path
+      # Use Vite proxy in development
       VITE_API_URL: ""
+    volumes:
+      - .:/app
+      - /app/node_modules
     depends_on:
       api:
         condition: service_started
@@ -17,14 +20,12 @@ services:
   api:
     build:
       context: ./server
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: workfit-api
     restart: unless-stopped
     environment:
       API_PORT: 3001
-      # In production, the frontend URL might need to be the actual domain
-      # or left as is if CORS is permissive or handled by Nginx
-      FRONTEND_URL: http://localhost:80
+      FRONTEND_URL: http://localhost:5173
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: workfit
@@ -32,6 +33,9 @@ services:
       DB_PASSWORD: workfit
     ports:
       - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
