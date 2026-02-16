@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://workfit-api:3001', // Proxy API requests to backend
+        target: 'http://api:3001', // Proxy API requests to backend (Docker service name)
         changeOrigin: true,
         secure: false,
       },

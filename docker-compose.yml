@@ -7,12 +7,11 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-    environment:
-      # In production, Nginx proxies /api, so we use relative path
-      VITE_API_URL: ""
     depends_on:
       api:
         condition: service_started
+    networks:
+      - workfit-net
 
   api:
     build:
@@ -25,32 +24,36 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-https://workfit.bluedyso.fr}
       DB_HOST: db
       DB_PORT: 5432
-      DB_NAME: workfit
-      DB_USER: workfit
-      DB_PASSWORD: workfit
-    ports:
-      - "3001:3001"
+      DB_NAME: ${DB_NAME:-workfit}
+      DB_USER: ${DB_USER:-workfit}
+      DB_PASSWORD: ${DB_PASSWORD:-workfit}
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - workfit-net
 
   db:
     image: postgres:16-alpine
     container_name: workfit-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: workfit
-      POSTGRES_USER: workfit
-      POSTGRES_PASSWORD: workfit
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME:-workfit}
+      POSTGRES_USER: ${DB_USER:-workfit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-workfit}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U workfit -d workfit"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-workfit} -d ${DB_NAME:-workfit}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - workfit-net
 
 volumes:
   postgres_data:
+
+networks:
+  workfit-net:
+    driver: bridge
