@@ -674,6 +674,11 @@ Sinon, réponds de façon naturelle et conversationnelle.`;
     res.setHeader('X-Accel-Buffering', 'no'); // Désactive le buffering nginx
     res.flushHeaders();
 
+    // Keepalive : envoyer un commentaire SSE toutes les 15s pour éviter
+    // que nginx (proxy_read_timeout 60s) ne coupe la connexion pendant
+    // que LightRAG génère sa réponse.
+    const keepalive = setInterval(() => res.write(': ping\n\n'), 15000);
+
     const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -686,6 +691,7 @@ Sinon, réponds de façon naturelle et conversationnelle.`;
     });
 
     if (!lightragResponse.ok) {
+      clearInterval(keepalive);
       res.write(`data: ${JSON.stringify({ error: `Erreur LightRAG: ${lightragResponse.status}` })}\n\n`);
       res.write('data: [DONE]\n\n');
       return res.end();
@@ -731,11 +737,13 @@ Sinon, réponds de façon naturelle et conversationnelle.`;
       }
     }
 
+    clearInterval(keepalive);
     res.write('data: [DONE]\n\n');
     res.end();
 
   } catch (error) {
     console.error('Erreur chat coach IA:', error);
+    if (typeof keepalive !== 'undefined') clearInterval(keepalive);
     if (!res.headersSent) {
       res.status(500).json({ error: error.message });
     } else {
