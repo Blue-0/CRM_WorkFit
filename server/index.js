@@ -535,19 +535,6 @@ app.delete('/api/health/body-measurements/:id', async (req, res) => {
   }
 });
 
-// Démarrage serveur
-app.listen(PORT, () => {
-  console.log(`🚀 API Server running on http://localhost:${PORT}`);
-  console.log('📊 Routes disponibles:');
-  console.log('   GET  /api/health/kpis');
-  console.log('   GET  /api/health/weight-history');
-  console.log('   CRUD /api/health/daily-diet');
-  console.log('   CRUD /api/health/daily-sport-sleep');
-  console.log('   CRUD /api/health/weekly-bilans');
-  console.log('   CRUD /api/health/body-measurements');
-});
-
-
 // ============================================
 // ROUTE GENERATION SEANCE SPORT (LightRAG)
 // ============================================
@@ -609,7 +596,7 @@ app.post('/api/health/generate-workout', async (req, res) => {
     // 4. Extraire le JSON de la réponse de LightRAG
     // LightRAG peut parfois ajouter du blabla avant/après le JSON
     const responseText = data.response || data;
-    const jsonMatch = responseText.match(/\\{.*\\}/s);
+    const jsonMatch = responseText.match(/{.*}/s);
 
     if (jsonMatch) {
       res.json(JSON.parse(jsonMatch[0]));
@@ -621,4 +608,17 @@ app.post('/api/health/generate-workout', async (req, res) => {
     console.error('Erreur génération séance:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Démarrage serveur
+app.listen(PORT, () => {
+  console.log(`🚀 API Server running on http://localhost:${PORT}`);
+  console.log('📊 Routes disponibles:');
+  console.log('   GET  /api/health/kpis');
+  console.log('   GET  /api/health/weight-history');
+  console.log('   CRUD /api/health/daily-diet');
+  console.log('   CRUD /api/health/daily-sport-sleep');
+  console.log('   CRUD /api/health/weekly-bilans');
+  console.log('   CRUD /api/health/body-measurements');
+  console.log('   POST /api/health/generate-workout');
 });

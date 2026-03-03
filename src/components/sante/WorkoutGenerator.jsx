@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const WorkoutGenerator = ({ userId }) => {
     const [prompt, setPrompt] = useState('');
@@ -13,13 +14,21 @@ const WorkoutGenerator = ({ userId }) => {
         setError('');
 
         try {
-            // Ton backend url défini dans ton fichier .env ou variables dokploy
-            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/health/generate-workout`,
-                { prompt_user: prompt },
-                { headers: { 'x-user-id': userId } } // Important : ton middleware backend demande ça
-            );
+            const response = await fetch(`${API_URL}/api/health/generate-workout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-id': userId,
+                },
+                body: JSON.stringify({ prompt_user: prompt }),
+            });
 
-            setWorkout(response.data);
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}`);
+            }
+
+            const data = await response.json();
+            setWorkout(data);
         } catch (err) {
             setError("Erreur lors de la génération de la séance.");
             console.error(err);
