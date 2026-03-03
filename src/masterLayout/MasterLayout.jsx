@@ -302,6 +302,15 @@ const MasterLayout = ({ children }) => {
                     Mensurations
                   </NavLink>
                 </li>
+                <li>
+                  <NavLink
+                    to='/coach-ia'
+                    className={(navData) => navData.isActive ? "active-page" : ""}
+                  >
+                    <i className='ri-circle-fill circle-icon text-purple w-auto' />
+                    Coach IA
+                  </NavLink>
+                </li>
               </ul>
             </li>
             <li className='dropdown'>

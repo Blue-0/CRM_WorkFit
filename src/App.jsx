@@ -100,6 +100,7 @@ import DailyDietPage from "./pages/DailyDietPage";
 import DailySportSleepPage from "./pages/DailySportSleepPage";
 import WeeklyBilansPage from "./pages/WeeklyBilansPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
+import CoachIAPage from "./pages/CoachIAPage";
 
 function App() {
   return (
@@ -111,6 +112,7 @@ function App() {
         <Route exact path='/daily-sport-sleep' element={<DailySportSleepPage />} />
         <Route exact path='/weekly-bilans' element={<WeeklyBilansPage />} />
         <Route exact path='/body-measurements-page' element={<BodyMeasurementsPage />} />
+        <Route exact path='/coach-ia' element={<CoachIAPage />} />
         <Route exact path='/index-1' element={<HomePageOne />} />
         <Route exact path='/index-2' element={<HomePageTwo />} />
         <Route exact path='/index-3' element={<HomePageThree />} />

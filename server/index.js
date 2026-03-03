@@ -610,6 +610,73 @@ app.post('/api/health/generate-workout', async (req, res) => {
   }
 });
 
+// ============================================
+// CHAT COACH IA (multi-tours avec LightRAG)
+// ============================================
+
+app.post('/api/health/chat-workout', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    // messages = [{ role: 'user'|'assistant', content: '...' }, ...]
+
+    if (!messages || messages.length === 0) {
+      return res.status(400).json({ error: 'Messages requis' });
+    }
+
+    // Récupérer le contexte utilisateur
+    const kpisResult = await pool.query(`
+      SELECT avg_weight, total_steps, avg_sleep_hours, total_sport_min
+      FROM weekly_stats_view WHERE user_id = $1 ORDER BY week_number DESC LIMIT 1
+    `, [req.userId]);
+
+    const kpis = kpisResult.rows[0] || {};
+
+    // Construire l'historique de conversation formaté
+    const conversationHistory = messages.map(m =>
+      `${m.role === 'user' ? 'Utilisateur' : 'Coach'}: ${m.content}`
+    ).join('\n');
+
+    const lastUserMessage = messages[messages.length - 1].content;
+
+    const fullPrompt = `
+      Tu es un coach sportif expert et bienveillant. Tu analyses le profil de l'utilisateur et tu réponds à ses questions de façon détaillée et personnalisée.
+
+      Contexte de santé de l'utilisateur :
+      - Poids moyen : ${kpis.avg_weight || 'Inconnu'} kg
+      - Temps de sport/semaine : ${kpis.total_sport_min || 0} min
+      - Sommeil moyen : ${kpis.avg_sleep_hours || 0} h
+      - Pas/semaine : ${kpis.total_steps || 0}
+
+      Historique de la conversation :
+      ${conversationHistory}
+
+      Réponds à la dernière question de l'utilisateur : "${lastUserMessage}"
+
+      Si l'utilisateur demande une séance, génère-la au format structuré avec des exercices détaillés.
+      Sinon, réponds de façon naturelle et conversationnelle en tant que coach.
+    `;
+
+    const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: fullPrompt, mode: 'hybrid' })
+    });
+
+    if (!lightragResponse.ok) {
+      throw new Error(`Erreur LightRAG: ${lightragResponse.statusText}`);
+    }
+
+    const data = await lightragResponse.json();
+    const responseText = data.response || data;
+
+    res.json({ content: responseText });
+
+  } catch (error) {
+    console.error('Erreur chat coach IA:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Démarrage serveur
 app.listen(PORT, () => {
   console.log(`🚀 API Server running on http://localhost:${PORT}`);
