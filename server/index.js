@@ -610,6 +610,150 @@ app.post('/api/health/generate-workout', async (req, res) => {
   }
 });
 
+// ============================================
+// CHAT COACH IA (multi-tours avec LightRAG)
+// ============================================
+
+app.post('/api/health/chat-workout', async (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    if (!messages || messages.length === 0) {
+      return res.status(400).json({ error: 'Messages requis' });
+    }
+
+    // Récupérer le contexte utilisateur depuis les tables réelles
+    let userContext = '';
+    try {
+      const [weightResult, sportResult] = await Promise.all([
+        pool.query(
+          `SELECT weight_kg FROM body_measurements WHERE user_id = $1 ORDER BY date DESC LIMIT 1`,
+          [req.userId]
+        ),
+        pool.query(
+          `SELECT
+            ROUND(AVG(sleep_hours)::numeric, 1) AS avg_sleep,
+            ROUND(AVG(duration_min)::numeric, 0) AS avg_duration,
+            COUNT(*) AS nb_seances
+           FROM daily_sport_sleep
+           WHERE user_id = $1 AND date >= NOW() - INTERVAL '30 days' AND duration_min IS NOT NULL`,
+          [req.userId]
+        )
+      ]);
+
+      const weight = weightResult.rows[0]?.weight_kg;
+      const avgSleep = sportResult.rows[0]?.avg_sleep;
+      const avgDuration = sportResult.rows[0]?.avg_duration;
+      const nbSeances = sportResult.rows[0]?.nb_seances;
+
+      if (weight || avgSleep || nbSeances) {
+        userContext = `\nContexte de l'utilisateur (données récentes) :
+- Poids : ${weight ? weight + ' kg' : 'non renseigné'}
+- Sommeil moyen : ${avgSleep ? avgSleep + ' h/nuit' : 'non renseigné'}
+- Durée moyenne séance : ${avgDuration ? avgDuration + ' min' : 'non renseigné'}
+- Séances sur les 30 derniers jours : ${nbSeances || 0}`;
+      }
+    } catch (dbErr) {
+      console.warn('Impossible de récupérer le contexte utilisateur:', dbErr.message);
+    }
+
+    const lastUserMessage = messages[messages.length - 1].content;
+    const historyForLightrag = messages.slice(0, -1);
+
+    const systemQuery = `Tu es un coach sportif expert et bienveillant.${userContext}
+
+Réponds à la question : ${lastUserMessage}
+
+Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
+Sinon, réponds de façon naturelle et conversationnelle.`;
+
+    // SSE headers pour streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Désactive le buffering nginx
+    res.flushHeaders();
+
+    // Keepalive : envoyer un commentaire SSE toutes les 15s pour éviter
+    // que nginx (proxy_read_timeout 60s) ne coupe la connexion pendant
+    // que LightRAG génère sa réponse.
+    const keepalive = setInterval(() => res.write(': ping\n\n'), 15000);
+
+    const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: systemQuery,
+        mode: 'hybrid',
+        stream: true,
+        conversation_history: historyForLightrag
+      })
+    });
+
+    if (!lightragResponse.ok) {
+      clearInterval(keepalive);
+      res.write(`data: ${JSON.stringify({ error: `Erreur LightRAG: ${lightragResponse.status}` })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      return res.end();
+    }
+
+    // Lire le stream NDJSON de LightRAG et le relayer en SSE
+    const reader = lightragResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Garder la dernière ligne incomplète
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line);
+          if (parsed.error) {
+            res.write(`data: ${JSON.stringify({ error: parsed.error })}\n\n`);
+          } else if (parsed.response !== undefined) {
+            res.write(`data: ${JSON.stringify({ content: parsed.response })}\n\n`);
+          }
+        } catch {
+          // Ligne non-JSON, ignorer
+        }
+      }
+    }
+
+    // Traiter le reste du buffer
+    if (buffer.trim()) {
+      try {
+        const parsed = JSON.parse(buffer);
+        if (parsed.response !== undefined) {
+          res.write(`data: ${JSON.stringify({ content: parsed.response })}\n\n`);
+        }
+      } catch {
+        // Ignorer
+      }
+    }
+
+    clearInterval(keepalive);
+    res.write('data: [DONE]\n\n');
+    res.end();
+
+  } catch (error) {
+    console.error('Erreur chat coach IA:', error);
+    if (typeof keepalive !== 'undefined') clearInterval(keepalive);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  }
+});
+
 // Démarrage serveur
 app.listen(PORT, () => {
   console.log(`🚀 API Server running on http://localhost:${PORT}`);
