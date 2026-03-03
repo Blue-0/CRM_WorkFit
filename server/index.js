@@ -660,12 +660,24 @@ app.post('/api/health/chat-workout', async (req, res) => {
     const lastUserMessage = messages[messages.length - 1].content;
     const historyForLightrag = messages.slice(0, -1);
 
+
+
+
     const systemQuery = `Tu es un coach sportif expert et bienveillant.${userContext}
 
-Réponds à la question : ${lastUserMessage}
+    Réponds à la question : ${lastUserMessage}
 
-Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
-Sinon, réponds de façon naturelle et conversationnelle.`;
+    Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
+
+    Tu dois pas :
+    - me montrer les references
+    - 
+
+
+    Sinon, réponds de façon naturelle et conversationnelle.`;
+
+
+
 
     // SSE headers pour streaming
     res.setHeader('Content-Type', 'text/event-stream');
