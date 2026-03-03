@@ -617,7 +617,6 @@ app.post('/api/health/generate-workout', async (req, res) => {
 app.post('/api/health/chat-workout', async (req, res) => {
   try {
     const { messages } = req.body;
-    // messages = [{ role: 'user'|'assistant', content: '...' }, ...]
 
     if (!messages || messages.length === 0) {
       return res.status(400).json({ error: 'Messages requis' });
@@ -658,9 +657,7 @@ app.post('/api/health/chat-workout', async (req, res) => {
       console.warn('Impossible de récupérer le contexte utilisateur:', dbErr.message);
     }
 
-    // Séparer la dernière question de l'historique pour LightRAG
     const lastUserMessage = messages[messages.length - 1].content;
-    // L'historique sans le dernier message (LightRAG le reçoit via `query`)
     const historyForLightrag = messages.slice(0, -1);
 
     const systemQuery = `Tu es un coach sportif expert et bienveillant.${userContext}
@@ -670,34 +667,82 @@ Réponds à la question : ${lastUserMessage}
 Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
 Sinon, réponds de façon naturelle et conversationnelle.`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90000);
+    // SSE headers pour streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Désactive le buffering nginx
+    res.flushHeaders();
 
-    const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query', {
+    const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: systemQuery,
         mode: 'hybrid',
+        stream: true,
         conversation_history: historyForLightrag
-      }),
-      signal: controller.signal
+      })
     });
 
-    clearTimeout(timeout);
-
     if (!lightragResponse.ok) {
-      throw new Error(`Erreur LightRAG: ${lightragResponse.statusText}`);
+      res.write(`data: ${JSON.stringify({ error: `Erreur LightRAG: ${lightragResponse.status}` })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      return res.end();
     }
 
-    const data = await lightragResponse.json();
-    const responseText = data.response || '';
+    // Lire le stream NDJSON de LightRAG et le relayer en SSE
+    const reader = lightragResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
 
-    res.json({ content: responseText });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Garder la dernière ligne incomplète
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line);
+          if (parsed.error) {
+            res.write(`data: ${JSON.stringify({ error: parsed.error })}\n\n`);
+          } else if (parsed.response !== undefined) {
+            res.write(`data: ${JSON.stringify({ content: parsed.response })}\n\n`);
+          }
+        } catch {
+          // Ligne non-JSON, ignorer
+        }
+      }
+    }
+
+    // Traiter le reste du buffer
+    if (buffer.trim()) {
+      try {
+        const parsed = JSON.parse(buffer);
+        if (parsed.response !== undefined) {
+          res.write(`data: ${JSON.stringify({ content: parsed.response })}\n\n`);
+        }
+      } catch {
+        // Ignorer
+      }
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
 
   } catch (error) {
     console.error('Erreur chat coach IA:', error);
-    res.status(500).json({ error: error.message });
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -6,18 +6,19 @@ const WorkoutChatLayer = ({ userId }) => {
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            content: 'Bonjour ! Je suis ton coach IA. Dis-moi ce que tu veux travailler aujourd\'hui, ou pose-moi n\'importe quelle question sur ton entraînement. 💪',
+            content: 'Bonjour ! Je suis ton coach IA. Dis-moi ce que tu veux travailler aujourd\'hui, ou pose-moi n\'importe quelle question sur ton entraînement.',
         },
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [streamingContent, setStreamingContent] = useState('');
     const bottomRef = useRef(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    }, [messages, streamingContent]);
 
-    const sendMessage = async () => {
+    const sendMessage = useCallback(async () => {
         const text = input.trim();
         if (!text || loading) return;
 
@@ -25,6 +26,7 @@ const WorkoutChatLayer = ({ userId }) => {
         setMessages(updatedMessages);
         setInput('');
         setLoading(true);
+        setStreamingContent('');
 
         try {
             const response = await fetch(`${API_URL}/api/health/chat-workout`, {
@@ -38,21 +40,54 @@ const WorkoutChatLayer = ({ userId }) => {
 
             if (!response.ok) throw new Error(`Erreur ${response.status}`);
 
-            const data = await response.json();
-            setMessages(prev => [
-                ...prev,
-                { role: 'assistant', content: data.content || "Je n'ai pas pu générer de réponse." },
-            ]);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullContent = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const data = line.slice(6);
+                    if (data === '[DONE]') continue;
+
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.content) {
+                            fullContent += parsed.content;
+                            setStreamingContent(fullContent);
+                        }
+                        if (parsed.error) {
+                            fullContent += `\n[Erreur: ${parsed.error}]`;
+                            setStreamingContent(fullContent);
+                        }
+                    } catch {
+                        // Ligne non-JSON, ignorer
+                    }
+                }
+            }
+
+            // Fin du stream : ajouter le message complet à l'historique
+            const finalContent = fullContent || "Je n'ai pas pu générer de réponse.";
+            setMessages(prev => [...prev, { role: 'assistant', content: finalContent }]);
+            setStreamingContent('');
+
         } catch (err) {
             setMessages(prev => [
                 ...prev,
                 { role: 'assistant', content: "Une erreur s'est produite. Vérifie ta connexion et réessaie." },
             ]);
+            setStreamingContent('');
             console.error(err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [input, loading, messages, userId]);
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -92,7 +127,6 @@ const WorkoutChatLayer = ({ userId }) => {
                             key={idx}
                             className={`d-flex gap-10 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                         >
-                            {/* Avatar */}
                             <div
                                 className="w-32-px h-32-px rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-sm"
                                 style={{
@@ -105,8 +139,6 @@ const WorkoutChatLayer = ({ userId }) => {
                             >
                                 {msg.role === 'user' ? '👤' : '🤖'}
                             </div>
-
-                            {/* Bulle */}
                             <div
                                 className="px-16 py-12 radius-8 text-sm"
                                 style={{
@@ -125,8 +157,34 @@ const WorkoutChatLayer = ({ userId }) => {
                         </div>
                     ))}
 
-                    {/* Indicateur de chargement */}
-                    {loading && (
+                    {/* Message en cours de streaming */}
+                    {loading && streamingContent && (
+                        <div className="d-flex gap-10 flex-row">
+                            <div
+                                className="w-32-px h-32-px rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-sm"
+                                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', minWidth: '32px' }}
+                            >
+                                🤖
+                            </div>
+                            <div
+                                className="px-16 py-12 radius-8 text-sm"
+                                style={{
+                                    maxWidth: '75%',
+                                    background: '#f1f5f9',
+                                    color: '#1e293b',
+                                    whiteSpace: 'pre-wrap',
+                                    lineHeight: '1.6',
+                                    borderRadius: '18px 18px 18px 4px',
+                                }}
+                            >
+                                {streamingContent}
+                                <span className="streaming-cursor" />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Indicateur d'attente (avant le premier chunk) */}
+                    {loading && !streamingContent && (
                         <div className="d-flex gap-10 flex-row">
                             <div
                                 className="w-32-px h-32-px rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
@@ -138,18 +196,9 @@ const WorkoutChatLayer = ({ userId }) => {
                                 className="px-16 py-12 radius-8 d-flex align-items-center gap-6"
                                 style={{ background: '#f1f5f9', borderRadius: '18px 18px 18px 4px' }}
                             >
-                                <span
-                                    className="rounded-circle"
-                                    style={{ width: 8, height: 8, background: '#94a3b8', display: 'inline-block', animation: 'bounce 1.2s infinite' }}
-                                />
-                                <span
-                                    className="rounded-circle"
-                                    style={{ width: 8, height: 8, background: '#94a3b8', display: 'inline-block', animation: 'bounce 1.2s infinite 0.2s' }}
-                                />
-                                <span
-                                    className="rounded-circle"
-                                    style={{ width: 8, height: 8, background: '#94a3b8', display: 'inline-block', animation: 'bounce 1.2s infinite 0.4s' }}
-                                />
+                                <span className="typing-dot" style={{ animationDelay: '0s' }} />
+                                <span className="typing-dot" style={{ animationDelay: '0.2s' }} />
+                                <span className="typing-dot" style={{ animationDelay: '0.4s' }} />
                             </div>
                         </div>
                     )}
@@ -193,6 +242,27 @@ const WorkoutChatLayer = ({ userId }) => {
                 @keyframes bounce {
                     0%, 60%, 100% { transform: translateY(0); }
                     30% { transform: translateY(-6px); }
+                }
+                .typing-dot {
+                    width: 8px;
+                    height: 8px;
+                    background: #94a3b8;
+                    border-radius: 50%;
+                    display: inline-block;
+                    animation: bounce 1.2s infinite;
+                }
+                .streaming-cursor {
+                    display: inline-block;
+                    width: 2px;
+                    height: 14px;
+                    background: #7c3aed;
+                    margin-left: 2px;
+                    vertical-align: text-bottom;
+                    animation: blink 0.8s infinite;
+                }
+                @keyframes blink {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0; }
                 }
             `}</style>
         </div>
