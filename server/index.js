@@ -626,7 +626,7 @@ app.post('/api/health/chat-workout', async (req, res) => {
     // Récupérer le contexte utilisateur depuis les tables réelles
     let userContext = '';
     try {
-      const [weightResult, activityResult] = await Promise.all([
+      const [weightResult, sportResult] = await Promise.all([
         pool.query(
           `SELECT weight_kg FROM body_measurements WHERE user_id = $1 ORDER BY date DESC LIMIT 1`,
           [req.userId]
@@ -634,20 +634,24 @@ app.post('/api/health/chat-workout', async (req, res) => {
         pool.query(
           `SELECT
             ROUND(AVG(sleep_hours)::numeric, 1) AS avg_sleep,
-            COUNT(*) FILTER (WHERE workout_type IS NOT NULL) AS nb_seances
-           FROM activity_logs WHERE user_id = $1 AND date >= NOW() - INTERVAL '30 days'`,
+            ROUND(AVG(duration_min)::numeric, 0) AS avg_duration,
+            COUNT(*) AS nb_seances
+           FROM daily_sport_sleep
+           WHERE user_id = $1 AND date >= NOW() - INTERVAL '30 days' AND duration_min IS NOT NULL`,
           [req.userId]
         )
       ]);
 
       const weight = weightResult.rows[0]?.weight_kg;
-      const avgSleep = activityResult.rows[0]?.avg_sleep;
-      const nbSeances = activityResult.rows[0]?.nb_seances;
+      const avgSleep = sportResult.rows[0]?.avg_sleep;
+      const avgDuration = sportResult.rows[0]?.avg_duration;
+      const nbSeances = sportResult.rows[0]?.nb_seances;
 
       if (weight || avgSleep || nbSeances) {
         userContext = `\nContexte de l'utilisateur (données récentes) :
 - Poids : ${weight ? weight + ' kg' : 'non renseigné'}
 - Sommeil moyen : ${avgSleep ? avgSleep + ' h/nuit' : 'non renseigné'}
+- Durée moyenne séance : ${avgDuration ? avgDuration + ' min' : 'non renseigné'}
 - Séances sur les 30 derniers jours : ${nbSeances || 0}`;
       }
     } catch (dbErr) {
@@ -666,6 +670,9 @@ Réponds à la question : ${lastUserMessage}
 Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
 Sinon, réponds de façon naturelle et conversationnelle.`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+
     const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -673,8 +680,11 @@ Sinon, réponds de façon naturelle et conversationnelle.`;
         query: systemQuery,
         mode: 'hybrid',
         conversation_history: historyForLightrag
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (!lightragResponse.ok) {
       throw new Error(`Erreur LightRAG: ${lightragResponse.statusText}`);
