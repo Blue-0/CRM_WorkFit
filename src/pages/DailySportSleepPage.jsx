@@ -9,7 +9,7 @@ const DailySportSleepPage = () => {
   return (
     <MasterLayout>
       <Breadcrumb title='Sport & Sommeil' />
-      <DailySportSleepLayer userId={userId} />
+      {/* <DailySportSleepLayer userId={userId} /> */}
       <WorkoutGenerator userId={userId} />
     </MasterLayout>
   );
