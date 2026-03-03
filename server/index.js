@@ -91,7 +91,7 @@ app.get('/api/health/kpis', async (req, res) => {
       LIMIT 1
     `;
     const result = await pool.query(query, [req.userId]);
-    
+
     if (result.rows.length === 0) {
       return res.json({
         avg_weight: 0,
@@ -100,7 +100,7 @@ app.get('/api/health/kpis', async (req, res) => {
         total_sport_min: 0
       });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Erreur /api/health/kpis:', error);
@@ -231,7 +231,7 @@ app.post('/api/health/daily-diet', async (req, res) => {
         snack_pm_rating, dinner_rating, hydration_rating, objectif_text, craquage_exces, feeling)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
       [req.userId, date, toNull(week_number), toNull(breakfast_rating), toNull(snack_am_rating), toNull(lunch_rating),
-        toNull(snack_pm_rating), toNull(dinner_rating), toNull(hydration_rating), objectif_text, craquage_exces, feeling]
+      toNull(snack_pm_rating), toNull(dinner_rating), toNull(hydration_rating), objectif_text, craquage_exces, feeling]
     );
 
     const dietId = dietResult.rows[0].id;
@@ -342,7 +342,7 @@ app.post('/api/health/daily-sport-sleep', async (req, res) => {
         sleep_hours, bedtime, wake_time, nap_start, nap_end, feeling)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
       [req.userId, date, toNull(week_number), workout_desc, toNull(duration_min), toNull(steps),
-        toNull(sleep_hours), toNull(bedtime), toNull(wake_time), toNull(nap_start), toNull(nap_end), feeling]
+      toNull(sleep_hours), toNull(bedtime), toNull(wake_time), toNull(nap_start), toNull(nap_end), feeling]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -416,8 +416,8 @@ app.post('/api/health/weekly-bilans', async (req, res) => {
         rating_collations_aprem, rating_diners, rating_hydratation, avg_sleep_hours, weight_kg, bilan_text)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
       [req.userId, toNull(week_number), total_sport_time, toNull(total_sport_min), toNull(avg_sport_min_per_day), toNull(total_steps),
-        toNull(avg_steps_per_day), toNull(rating_petits_dejeuners), toNull(rating_collations_matin), toNull(rating_dejeuners),
-        toNull(rating_collations_aprem), toNull(rating_diners), toNull(rating_hydratation), toNull(avg_sleep_hours), toNull(weight_kg), bilan_text]
+      toNull(avg_steps_per_day), toNull(rating_petits_dejeuners), toNull(rating_collations_matin), toNull(rating_dejeuners),
+      toNull(rating_collations_aprem), toNull(rating_diners), toNull(rating_hydratation), toNull(avg_sleep_hours), toNull(weight_kg), bilan_text]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -439,9 +439,9 @@ app.put('/api/health/weekly-bilans/:id', async (req, res) => {
         avg_sleep_hours=$13, weight_kg=$14, bilan_text=$15
        WHERE id=$16 AND user_id=$17 RETURNING *`,
       [toNull(week_number), total_sport_time, toNull(total_sport_min), toNull(avg_sport_min_per_day), toNull(total_steps),
-        toNull(avg_steps_per_day), toNull(rating_petits_dejeuners), toNull(rating_collations_matin), toNull(rating_dejeuners),
-        toNull(rating_collations_aprem), toNull(rating_diners), toNull(rating_hydratation), toNull(avg_sleep_hours), toNull(weight_kg), bilan_text,
-        req.params.id, req.userId]
+      toNull(avg_steps_per_day), toNull(rating_petits_dejeuners), toNull(rating_collations_matin), toNull(rating_dejeuners),
+      toNull(rating_collations_aprem), toNull(rating_diners), toNull(rating_hydratation), toNull(avg_sleep_hours), toNull(weight_kg), bilan_text,
+      req.params.id, req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Non trouvé' });
     res.json(result.rows[0]);
@@ -494,7 +494,7 @@ app.post('/api/health/body-measurements', async (req, res) => {
         abs_cm, hips_cm, bicep_left_cm, bicep_right_cm, thigh_left_cm, thigh_right_cm)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
       [req.userId, date, toNull(week_number), toNull(weight_kg), toNull(shoulders_cm), toNull(chest_cm), toNull(waist_cm), toNull(abs_cm), toNull(hips_cm),
-        toNull(bicep_left_cm), toNull(bicep_right_cm), toNull(thigh_left_cm), toNull(thigh_right_cm)]
+      toNull(bicep_left_cm), toNull(bicep_right_cm), toNull(thigh_left_cm), toNull(thigh_right_cm)]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -545,4 +545,80 @@ app.listen(PORT, () => {
   console.log('   CRUD /api/health/daily-sport-sleep');
   console.log('   CRUD /api/health/weekly-bilans');
   console.log('   CRUD /api/health/body-measurements');
+});
+
+
+// ============================================
+// ROUTE GENERATION SEANCE SPORT (LightRAG)
+// ============================================
+
+app.post('/api/health/generate-workout', async (req, res) => {
+  try {
+    const { prompt_user } = req.body;
+
+    // 1. Récupérer le contexte utilisateur depuis la BDD
+    // Exemple : dernier bilan, poids, historique sport récent
+    const kpisResult = await pool.query(`
+      SELECT avg_weight, total_steps, avg_sleep_hours, total_sport_min 
+      FROM weekly_stats_view WHERE user_id = $1 ORDER BY week_number DESC LIMIT 1
+    `, [req.userId]);
+
+    const kpis = kpisResult.rows[0] || {};
+
+    // 2. Construire le prompt enrichi pour LightRAG
+    const fullPrompt = `
+      Agis comme un coach sportif expert. 
+      L'utilisateur demande : "${prompt_user}"
+      
+      Voici le contexte de santé actuel de l'utilisateur :
+      - Poids moyen : ${kpis.avg_weight || 'Inconnu'} kg
+      - Temps de sport/semaine : ${kpis.total_sport_min || 0} min
+      - Sommeil moyen : ${kpis.avg_sleep_hours || 0} h
+      
+      Génère une séance de sport détaillée, adaptée à ce profil et à sa demande.
+      Retourne la réponse au format JSON strictement avec cette structure :
+      {
+        "titre": "Titre de la séance",
+        "duree_estimee": "en minutes",
+        "echauffement": ["liste des exos"],
+        "exercices": [
+          { "nom": "nom", "series": X, "reps": "Y", "repos": "Z sec", "consigne": "..." }
+        ]
+      }
+    `;
+
+    // 3. Appel à ton API LightRAG via dokploy
+    const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // 'Authorization': `Bearer ${process.env.LIGHTRAG_API_KEY}` // Si tu en as mis une
+      },
+      body: JSON.stringify({
+        query: fullPrompt,
+        mode: "hybrid" // 'hybrid' est très puissant si ton graphe a des données sur les muscles/exos
+      })
+    });
+
+    if (!lightragResponse.ok) {
+      throw new Error(`Erreur LightRAG: ${lightragResponse.statusText}`);
+    }
+
+    const data = await lightragResponse.json();
+
+    // 4. Extraire le JSON de la réponse de LightRAG
+    // LightRAG peut parfois ajouter du blabla avant/après le JSON
+    const responseText = data.response || data;
+    const jsonMatch = responseText.match(/\\{.*\\}/s);
+
+    if (jsonMatch) {
+      res.json(JSON.parse(jsonMatch[0]));
+    } else {
+      res.json({ raw_text: responseText });
+    }
+
+  } catch (error) {
+    console.error('Erreur génération séance:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
