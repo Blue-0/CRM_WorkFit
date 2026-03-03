@@ -623,43 +623,57 @@ app.post('/api/health/chat-workout', async (req, res) => {
       return res.status(400).json({ error: 'Messages requis' });
     }
 
-    // Récupérer le contexte utilisateur
-    const kpisResult = await pool.query(`
-      SELECT avg_weight, total_steps, avg_sleep_hours, total_sport_min
-      FROM weekly_stats_view WHERE user_id = $1 ORDER BY week_number DESC LIMIT 1
-    `, [req.userId]);
+    // Récupérer le contexte utilisateur depuis les tables réelles
+    let userContext = '';
+    try {
+      const [weightResult, activityResult] = await Promise.all([
+        pool.query(
+          `SELECT weight_kg FROM body_measurements WHERE user_id = $1 ORDER BY date DESC LIMIT 1`,
+          [req.userId]
+        ),
+        pool.query(
+          `SELECT
+            ROUND(AVG(sleep_hours)::numeric, 1) AS avg_sleep,
+            COUNT(*) FILTER (WHERE workout_type IS NOT NULL) AS nb_seances
+           FROM activity_logs WHERE user_id = $1 AND date >= NOW() - INTERVAL '30 days'`,
+          [req.userId]
+        )
+      ]);
 
-    const kpis = kpisResult.rows[0] || {};
+      const weight = weightResult.rows[0]?.weight_kg;
+      const avgSleep = activityResult.rows[0]?.avg_sleep;
+      const nbSeances = activityResult.rows[0]?.nb_seances;
 
-    // Construire l'historique de conversation formaté
-    const conversationHistory = messages.map(m =>
-      `${m.role === 'user' ? 'Utilisateur' : 'Coach'}: ${m.content}`
-    ).join('\n');
+      if (weight || avgSleep || nbSeances) {
+        userContext = `\nContexte de l'utilisateur (données récentes) :
+- Poids : ${weight ? weight + ' kg' : 'non renseigné'}
+- Sommeil moyen : ${avgSleep ? avgSleep + ' h/nuit' : 'non renseigné'}
+- Séances sur les 30 derniers jours : ${nbSeances || 0}`;
+      }
+    } catch (dbErr) {
+      console.warn('Impossible de récupérer le contexte utilisateur:', dbErr.message);
+    }
 
+    // Séparer la dernière question de l'historique pour LightRAG
     const lastUserMessage = messages[messages.length - 1].content;
+    // L'historique sans le dernier message (LightRAG le reçoit via `query`)
+    const historyForLightrag = messages.slice(0, -1);
 
-    const fullPrompt = `
-      Tu es un coach sportif expert et bienveillant. Tu analyses le profil de l'utilisateur et tu réponds à ses questions de façon détaillée et personnalisée.
+    const systemQuery = `Tu es un coach sportif expert et bienveillant.${userContext}
 
-      Contexte de santé de l'utilisateur :
-      - Poids moyen : ${kpis.avg_weight || 'Inconnu'} kg
-      - Temps de sport/semaine : ${kpis.total_sport_min || 0} min
-      - Sommeil moyen : ${kpis.avg_sleep_hours || 0} h
-      - Pas/semaine : ${kpis.total_steps || 0}
+Réponds à la question : ${lastUserMessage}
 
-      Historique de la conversation :
-      ${conversationHistory}
-
-      Réponds à la dernière question de l'utilisateur : "${lastUserMessage}"
-
-      Si l'utilisateur demande une séance, génère-la au format structuré avec des exercices détaillés.
-      Sinon, réponds de façon naturelle et conversationnelle en tant que coach.
-    `;
+Si l'utilisateur demande une séance d'entraînement, génère-la avec des exercices détaillés (séries, répétitions, temps de repos, conseils).
+Sinon, réponds de façon naturelle et conversationnelle.`;
 
     const lightragResponse = await fetch('https://lightworkfit.bluedyso.fr/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: fullPrompt, mode: 'hybrid' })
+      body: JSON.stringify({
+        query: systemQuery,
+        mode: 'hybrid',
+        conversation_history: historyForLightrag
+      })
     });
 
     if (!lightragResponse.ok) {
@@ -667,7 +681,7 @@ app.post('/api/health/chat-workout', async (req, res) => {
     }
 
     const data = await lightragResponse.json();
-    const responseText = data.response || data;
+    const responseText = data.response || '';
 
     res.json({ content: responseText });
 
