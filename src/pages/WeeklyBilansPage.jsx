@@ -1,9 +1,11 @@
+import { useAuth } from "../context/AuthContext";
 import MasterLayout from "../masterLayout/MasterLayout";
 import Breadcrumb from "../components/Breadcrumb";
 import WeeklyBilansLayer from "../components/sante/WeeklyBilansLayer";
 
 const WeeklyBilansPage = () => {
-  const userId = localStorage.getItem('user_id');
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return (
     <MasterLayout>

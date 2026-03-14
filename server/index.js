@@ -53,8 +53,8 @@ const toNull = (v) => (v === '' || v === undefined ? null : v);
 // ============================================
 
 // POST /api/auth/login - Connexion par email
-app.get('/api/auth/login', async (req, res) => {
-  const { email } = req.query;
+app.post('/api/auth/login', async (req, res) => {
+  const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email requis' });
 
   try {
@@ -65,7 +65,29 @@ app.get('/api/auth/login', async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Erreur login:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erreur interne du serveur' });
+  }
+});
+
+// POST /api/auth/register - Inscription par email
+app.post('/api/auth/register', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email requis' });
+
+  try {
+    const checkResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (checkResult.rows.length > 0) {
+      return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+    }
+
+    const insertResult = await pool.query(
+      'INSERT INTO users (email) VALUES ($1) RETURNING id, email',
+      [email]
+    );
+    res.status(201).json(insertResult.rows[0]);
+  } catch (error) {
+    console.error('Erreur register:', error);
+    res.status(500).json({ error: 'Erreur interne du serveur' });
   }
 });
 

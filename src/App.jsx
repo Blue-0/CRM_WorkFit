@@ -95,6 +95,9 @@ import ComingSoonPage from "./pages/sample/ComingSoonPage";
 import AccessDeniedPage from "./pages/sample/AccessDeniedPage";
 import MaintenancePage from "./pages/sample/MaintenancePage";
 import BlankPagePage from "./pages/sample/BlankPagePage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
 import Santee from "./pages/Santee";
 import DailyDietPage from "./pages/DailyDietPage";
 import DailySportSleepPage from "./pages/DailySportSleepPage";
@@ -107,12 +110,14 @@ function App() {
     <BrowserRouter>
       <RouteScrollToTop />
       <Routes>
-        <Route exact path='/' element={<Santee />} />
-        <Route exact path='/daily-diet' element={<DailyDietPage />} />
-        <Route exact path='/daily-sport-sleep' element={<DailySportSleepPage />} />
-        <Route exact path='/weekly-bilans' element={<WeeklyBilansPage />} />
-        <Route exact path='/body-measurements-page' element={<BodyMeasurementsPage />} />
-        <Route exact path='/coach-ia' element={<CoachIAPage />} />
+        <Route exact path='/login' element={<Login />} />
+        <Route exact path='/register' element={<Register />} />
+        <Route exact path='/' element={<ProtectedRoute><Santee /></ProtectedRoute>} />
+        <Route exact path='/daily-diet' element={<ProtectedRoute><DailyDietPage /></ProtectedRoute>} />
+        <Route exact path='/daily-sport-sleep' element={<ProtectedRoute><DailySportSleepPage /></ProtectedRoute>} />
+        <Route exact path='/weekly-bilans' element={<ProtectedRoute><WeeklyBilansPage /></ProtectedRoute>} />
+        <Route exact path='/body-measurements-page' element={<ProtectedRoute><BodyMeasurementsPage /></ProtectedRoute>} />
+        <Route exact path='/coach-ia' element={<ProtectedRoute><CoachIAPage /></ProtectedRoute>} />
         <Route exact path='/index-1' element={<HomePageOne />} />
         <Route exact path='/index-2' element={<HomePageTwo />} />
         <Route exact path='/index-3' element={<HomePageThree />} />
