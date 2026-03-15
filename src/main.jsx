@@ -8,9 +8,12 @@ import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import App from "./App.jsx";
+import { AuthProvider } from "./context/AuthContext";
 
 createRoot(document.getElementById("root")).render(
   <>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </>
 );
