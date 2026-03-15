@@ -238,12 +238,15 @@ app.post('/api/health/daily-diet', async (req, res) => {
 
     // Insérer les items de repas si fournis
     if (items && items.length > 0) {
-      for (const item of items) {
-        await client.query(
-          `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order) VALUES ($1,$2,$3,$4)`,
-          [dietId, item.meal_type, item.item_text, item.sort_order || 0]
-        );
-      }
+      const mealTypes = items.map(item => item.meal_type);
+      const itemTexts = items.map(item => item.item_text);
+      const sortOrders = items.map(item => item.sort_order || 0);
+
+      await client.query(
+        `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order)
+         SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[])`,
+        [dietId, mealTypes, itemTexts, sortOrders]
+      );
     }
 
     await client.query('COMMIT');
@@ -278,10 +281,16 @@ app.put('/api/health/daily-diet/:id', async (req, res) => {
     // Remplacer les items
     if (items) {
       await client.query('DELETE FROM diet_items WHERE daily_diet_id = $1', [req.params.id]);
-      for (const item of items) {
+
+      if (items.length > 0) {
+        const mealTypes = items.map(item => item.meal_type);
+        const itemTexts = items.map(item => item.item_text);
+        const sortOrders = items.map(item => item.sort_order || 0);
+
         await client.query(
-          `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order) VALUES ($1,$2,$3,$4)`,
-          [req.params.id, item.meal_type, item.item_text, item.sort_order || 0]
+          `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order)
+           SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[])`,
+          [req.params.id, mealTypes, itemTexts, sortOrders]
         );
       }
     }
