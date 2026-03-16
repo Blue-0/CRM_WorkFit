@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Icon } from "@iconify/react";
 
 const API_URL = 'http://localhost:3001';
@@ -26,6 +26,17 @@ const MEAL_TYPE_LABELS = {
   dejeuner: 'Déjeuner',
   collation_pm: 'Collation PM',
   diner: 'Dîner'
+};
+
+const STAR_ARRAY = [0, 1, 2];
+const STAR_INPUT_ARRAY = [0, 1, 2, 3];
+
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) : '-';
+const formatDateLong = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '-';
+
+const avgRating = (row) => {
+  const vals = [row.breakfast_rating, row.lunch_rating, row.dinner_rating, row.hydration_rating].map(v => parseInt(v) || 0);
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 };
 
 const emptyForm = {
@@ -105,20 +116,12 @@ const DailyDietLayer = ({ userId }) => {
   });
   const removeItem = (i) => setForm(prev => ({ ...prev, items: prev.items.filter((_, idx) => idx !== i) }));
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) : '-';
-  const formatDateLong = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '-';
-
-  const avgRating = (row) => {
-    const vals = [row.breakfast_rating, row.lunch_rating, row.dinner_rating, row.hydration_rating].map(v => parseInt(v) || 0);
-    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
-  };
-
   // Star rendering following DefaultStarRatings pattern
   const renderStars = (n) => {
     const val = parseInt(n) || 0;
     return (
       <ul className='d-flex align-items-center gap-2' style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {[0, 1, 2].map(i => (
+        {STAR_ARRAY.map(i => (
           <li key={i} className={`${i < val ? 'text-warning-600' : 'text-neutral-400'} text-xl line-height-1`}>
             <Icon icon='material-symbols:star' />
           </li>
@@ -132,7 +135,7 @@ const DailyDietLayer = ({ userId }) => {
     <div className='mb-16'>
       <label className='form-label fw-semibold text-primary-light text-sm mb-8'>{RATING_LABELS[field]}</label>
       <ul className='d-flex align-items-center gap-8' style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {[0, 1, 2, 3].map(i => (
+        {STAR_INPUT_ARRAY.map(i => (
           <li key={i}
             className={`${i <= value ? 'text-warning-600' : 'text-neutral-400'} text-2xl line-height-1`}
             style={{ cursor: 'pointer' }}
@@ -144,11 +147,26 @@ const DailyDietLayer = ({ userId }) => {
     </div>
   );
 
+  const processedData = useMemo(() => {
+    return data.map(row => {
+      const dateObj = new Date(row.date);
+      return {
+        ...row,
+        calculatedAvgRating: avgRating(row),
+        formattedDate: formatDate(row.date),
+        dayOfMonth: dateObj.getDate()
+      };
+    });
+  }, [data]);
+
   // KPI cards following HealthKPIs / UnitCountOne pattern
-  const thisWeek = data.filter(d => (Date.now() - new Date(d.date).getTime()) / 86400000 <= 7);
-  const kpiCards = [
+  const thisWeek = useMemo(() => {
+    return processedData.filter(d => (Date.now() - new Date(d.date).getTime()) / 86400000 <= 7);
+  }, [processedData]);
+
+  const kpiCards = useMemo(() => [
     {
-      label: 'Total Entrées', value: data.length,
+      label: 'Total Entrées', value: processedData.length,
       icon: 'mdi:notebook-outline', bgColor: 'bg-cyan', gradientClass: 'bg-gradient-start-1'
     },
     {
@@ -156,15 +174,15 @@ const DailyDietLayer = ({ userId }) => {
       icon: 'mdi:calendar-week', bgColor: 'bg-purple', gradientClass: 'bg-gradient-start-2'
     },
     {
-      label: 'Dernière Saisie', value: data.length > 0 ? formatDate(data[0]?.date) : '-',
+      label: 'Dernière Saisie', value: processedData.length > 0 ? processedData[0].formattedDate : '-',
       icon: 'mdi:calendar-check', bgColor: 'bg-info', gradientClass: 'bg-gradient-start-3'
     },
     {
       label: 'Humeur Moy.',
-      value: data.length > 0 ? `${avgRating(data[0])}/3` : '-',
+      value: processedData.length > 0 ? `${processedData[0].calculatedAvgRating}/3` : '-',
       icon: 'mdi:emoticon-happy-outline', bgColor: 'bg-success-main', gradientClass: 'bg-gradient-start-4'
     }
-  ];
+  ], [processedData, thisWeek]);
 
   return (
     <>
@@ -219,14 +237,14 @@ const DailyDietLayer = ({ userId }) => {
                 <span className='visually-hidden'>Chargement...</span>
               </div>
             </div>
-          ) : data.length === 0 ? (
+          ) : processedData.length === 0 ? (
             <div className='text-center py-40'>
               <h6 className='text-secondary-light fw-normal'>Aucun journal alimentaire enregistré</h6>
               <p className='text-sm text-secondary-light'>Commence à suivre ton alimentation quotidienne</p>
             </div>
           ) : (
             <div className='d-flex flex-column gap-0'>
-              {data.map(row => (
+              {processedData.map(row => (
                 <div key={row.id}
                   className='d-flex align-items-center justify-content-between gap-3 px-24 py-16 border-bottom cursor-pointer'
                   style={{ cursor: 'pointer', transition: 'background 0.15s' }}
@@ -238,12 +256,12 @@ const DailyDietLayer = ({ userId }) => {
                     <div className='flex-shrink-0'>
                       <div className='w-40-px h-40-px bg-primary-50 rounded-circle d-flex justify-content-center align-items-center'>
                         <span className='fw-bold text-primary-600 text-sm'>
-                          {new Date(row.date).getDate()}
+                          {row.dayOfMonth}
                         </span>
                       </div>
                     </div>
                     <div className='flex-grow-1'>
-                      <h6 className='text-md mb-0 fw-medium text-primary-light'>{formatDate(row.date)}</h6>
+                      <h6 className='text-md mb-0 fw-medium text-primary-light'>{row.formattedDate}</h6>
                       {row.feeling && <span className='text-sm text-secondary-light fw-normal'>{row.feeling}</span>}
                     </div>
                   </div>
@@ -266,8 +284,8 @@ const DailyDietLayer = ({ userId }) => {
 
                   {/* Mobile: avg badge */}
                   <div className='d-flex d-md-none'>
-                    <span className={`px-12 py-6 rounded-pill fw-medium text-sm ${avgRating(row) >= 2 ? 'bg-success-focus text-success-main' : avgRating(row) >= 1 ? 'bg-warning-focus text-warning-main' : 'bg-danger-focus text-danger-main'}`}>
-                      {avgRating(row)}/3
+                    <span className={`px-12 py-6 rounded-pill fw-medium text-sm ${row.calculatedAvgRating >= 2 ? 'bg-success-focus text-success-main' : row.calculatedAvgRating >= 1 ? 'bg-warning-focus text-warning-main' : 'bg-danger-focus text-danger-main'}`}>
+                      {row.calculatedAvgRating}/3
                     </span>
                   </div>
 
