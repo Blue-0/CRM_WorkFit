@@ -391,7 +391,11 @@ app.delete('/api/health/daily-sport-sleep/:id', async (req, res) => {
 app.get('/api/health/weekly-bilans', async (req, res) => {
   try {
     const query = `
-      SELECT * FROM weekly_bilans
+      SELECT id, week_number, total_sport_time, total_sport_min, avg_sport_min_per_day,
+             total_steps, avg_steps_per_day, rating_petits_dejeuners, rating_collations_matin,
+             rating_dejeuners, rating_collations_aprem, rating_diners, rating_hydratation,
+             avg_sleep_hours, weight_kg, bilan_text
+      FROM weekly_bilans
       WHERE user_id = $1
       ORDER BY week_number DESC
       LIMIT 50
