@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+const fs = require('fs');
+
+let code = `import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from "@iconify/react";
 
 const searchCache = {}; // Cache local pour optimiser la latence (mémoire)
@@ -51,7 +53,7 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
       try {
         // Ajout de lc=fr et cc=fr pour cibler plus vite la base fr, json=1 et fields précis pour réduire la taille de la réponse
         const fields = 'id,code,product_name,brands,image_front_thumb_url,image_thumb_url,nutriments';
-        const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(trimmedQuery)}&search_simple=1&action=process&json=1&page_size=15&lc=fr&cc=fr&fields=${fields}`);
+        const response = await fetch(\`https://world.openfoodfacts.org/cgi/search.pl?search_terms=\${encodeURIComponent(trimmedQuery)}&search_simple=1&action=process&json=1&page_size=15&lc=fr&cc=fr&fields=\${fields}\`);
         const data = await response.json();
 
         if (data.products) {
@@ -59,7 +61,7 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
             .filter(p => p.product_name) // Seulement ceux qui ont un nom
             .map(p => ({
               product_id: p.id || p.code,
-              item_text: p.product_name + (p.brands ? ` - ${p.brands}` : ''),
+              item_text: p.product_name + (p.brands ? \` - \${p.brands}\` : ''),
               image_url: p.image_front_thumb_url || p.image_thumb_url || '',
               calories: p.nutriments?.['energy-kcal_100g'] || p.nutriments?.['energy-kcal'] || null,
               proteins: p.nutriments?.['proteins_100g'] || p.nutriments?.['proteins'] || null,
@@ -130,14 +132,14 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
           {loading && results.length === 0 && (
              <li className="dropdown-item py-16 px-16 text-center text-primary-light d-flex flex-column align-items-center gap-8 bg-neutral-50" style={{ pointerEvents: 'none' }}>
                 <span className="spinner-border text-primary-main" style={{ width: '24px', height: '24px' }}></span>
-                <span className="d-block text-sm fw-medium text-neutral-600 mt-2">Recherche de "{query}"quot;{query}"{query}"quot; sur OpenFoodFacts...</span>
+                <span className="d-block text-sm fw-medium text-neutral-600 mt-2">Recherche de "{query}" sur OpenFoodFacts...</span>
              </li>
           )}
 
           {!loading && results.length > 0 && (
             results.map((product, idx) => (
               <li
-                key={`${product.product_id}-${idx}`}
+                key={\`\${product.product_id}-\${idx}\`}
                 className="dropdown-item d-flex align-items-center gap-12 py-12 px-12 border-bottom cursor-pointer text-wrap"
                 onClick={() => handleSelect(product)}
                 style={{ cursor: 'pointer' }}
@@ -156,7 +158,7 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
                     {product.calories !== null ? (
                       <span className="bg-primary-50 text-primary-600 px-6 py-2 radius-4 fw-medium">{Math.round(product.calories)} kcal/100g</span>
                     ) : (
-                      <span className="text-neutral-400 fst-italic">Pas d&apos;infos nutritionnelles</span>
+                      <span className="text-neutral-400 fst-italic">Pas d'infos nutritionnelles</span>
                     )}
                     {product.proteins !== null && <span className="text-neutral-500">P: {Math.round(product.proteins)}g</span>}
                     {product.carbohydrates !== null && <span className="text-neutral-500">G: {Math.round(product.carbohydrates)}g</span>}
@@ -173,7 +175,7 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
               <div>
                 <span className="d-block text-sm fw-medium text-neutral-600 mb-4">Produit introuvable sur OpenFoodFacts</span>
                 <span className="d-block text-xs text-neutral-500 lh-sm text-wrap">
-                  Votre saisie manuelle <strong>"{query}"quot;{query}"{query}"quot;</strong> sera tout de même enregistrée dans le repas. Vous pourrez ajuster les macros manuellement.
+                  Votre saisie manuelle <strong>"{query}"</strong> sera tout de même enregistrée dans le repas. Vous pourrez ajuster les macros manuellement.
                 </span>
               </div>
             </li>
@@ -184,4 +186,6 @@ const FoodSearchAutocomplete = ({ value, onChange, onSelect }) => {
   );
 };
 
-export default FoodSearchAutocomplete;
+export default FoodSearchAutocomplete;`;
+
+fs.writeFileSync('src/components/sante/FoodSearchAutocomplete.jsx', code);
