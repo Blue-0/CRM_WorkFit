@@ -8,6 +8,24 @@ import DietCompliance from "../components/sante/DietCompliance";
 import DailyLogsTable from "../components/sante/DailyLogsTable";
 import { Icon } from "@iconify/react";
 
+// Composant Banner
+const Banner = () => {
+  return (
+    <div style={{
+      backgroundColor: '#e3f2fd',
+      color: '#0d47a1',
+      padding: '16px',
+      borderRadius: '8px',
+      textAlign: 'center',
+      marginBottom: '24px',
+      fontSize: '18px',
+      fontWeight: '500',
+    }}>
+      Bienvenue sur l'app WorkFit, l'app qui vous fait vous bouger !
+    </div>
+  );
+};
+
 const Santee = () => {
   const { user, logout } = useAuth();
   const handleLogout = () => logout();
@@ -16,6 +34,9 @@ const Santee = () => {
 
   return (
     <MasterLayout>
+      {/* Banner */}
+      <Banner />
+
       {/* Breadcrumb */}
       <div className='d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24'>
         <div className="d-flex align-items-center gap-3">
