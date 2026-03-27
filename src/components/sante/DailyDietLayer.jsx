@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Icon } from "@iconify/react";
+import FoodSearchAutocomplete from "./FoodSearchAutocomplete";
+
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -109,10 +111,27 @@ const DailyDietLayer = ({ userId }) => {
   const setRating = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const setField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const addItem = () => setForm(prev => ({
-    ...prev, items: [...prev.items, { meal_type: 'petit_dejeuner', item_text: '', sort_order: prev.items.length }]
+    ...prev, items: [...prev.items, { meal_type: 'petit_dejeuner', item_text: '', product_id: null, image_url: '', calories: null, proteins: null, carbohydrates: null, fats: null, quantity: 100, unit: 'g', sort_order: prev.items.length }]
   }));
   const updateItem = (i, field, value) => setForm(prev => {
     const items = [...prev.items]; items[i] = { ...items[i], [field]: value }; return { ...prev, items };
+  });
+
+  const handleFoodSelect = (i, productData) => setForm(prev => {
+    const items = [...prev.items];
+    items[i] = {
+      ...items[i],
+      item_text: productData.item_text,
+      product_id: productData.product_id,
+      image_url: productData.image_url,
+      calories: productData.calories,
+      proteins: productData.proteins,
+      carbohydrates: productData.carbohydrates,
+      fats: productData.fats,
+      quantity: productData.quantity || 100,
+      unit: productData.unit || 'g'
+    };
+    return { ...prev, items };
   });
   const removeItem = (i) => setForm(prev => ({ ...prev, items: prev.items.filter((_, idx) => idx !== i) }));
 
@@ -353,21 +372,74 @@ const DailyDietLayer = ({ userId }) => {
                 )}
 
                 {/* Diet items */}
+
                 {showDetail.items && showDetail.items.length > 0 && (
                   <>
-                    <h6 className='text-md fw-semibold mb-12 mt-16'>🍴 Détails repas</h6>
-                    <div className='d-flex flex-column gap-8'>
-                      {showDetail.items.map((item, i) => (
-                        <div key={i} className='d-flex align-items-center gap-12'>
-                          <span className='bg-primary-focus text-primary-main px-10 py-4 radius-8 fw-medium text-xs' style={{ minWidth: 85 }}>
-                            {MEAL_TYPE_LABELS[item.meal_type] || item.meal_type}
-                          </span>
-                          <span className='text-sm text-primary-light'>{item.item_text}</span>
+                    <div className='d-flex align-items-center justify-content-between mb-12 mt-16'>
+                      <h6 className='text-md fw-semibold mb-0'>🍴 Détails repas</h6>
+                      <div className='d-flex align-items-center gap-12 flex-wrap'>
+                        <span className='bg-primary-50 text-primary-600 px-8 py-4 radius-4 text-xs fw-medium'>
+                          Kcal: {Math.round(showDetail.items.reduce((acc, it) => acc + ((parseFloat(it.calories) || 0) * (parseFloat(it.quantity) || 100) / 100), 0))}
+                        </span>
+                        <span className='bg-neutral-100 text-neutral-600 px-8 py-4 radius-4 text-xs fw-medium'>
+                          P: {Math.round(showDetail.items.reduce((acc, it) => acc + ((parseFloat(it.proteins) || 0) * (parseFloat(it.quantity) || 100) / 100), 0))}g
+                        </span>
+                        <span className='bg-neutral-100 text-neutral-600 px-8 py-4 radius-4 text-xs fw-medium'>
+                          G: {Math.round(showDetail.items.reduce((acc, it) => acc + ((parseFloat(it.carbohydrates) || 0) * (parseFloat(it.quantity) || 100) / 100), 0))}g
+                        </span>
+                        <span className='bg-neutral-100 text-neutral-600 px-8 py-4 radius-4 text-xs fw-medium'>
+                          L: {Math.round(showDetail.items.reduce((acc, it) => acc + ((parseFloat(it.fats) || 0) * (parseFloat(it.quantity) || 100) / 100), 0))}g
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='d-flex flex-column gap-12'>
+                      {showDetail.items.map((item, i) => {
+                        const qttyMultiplier = (parseFloat(item.quantity) || 100) / 100;
+                        const hasNutritionInfo = item.calories !== null && item.calories !== undefined;
+
+                        return (
+                        <div key={i} className='d-flex align-items-center gap-12 bg-neutral-50 p-12 radius-8 border border-neutral-200'>
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.item_text} className='radius-4 flex-shrink-0' style={{ width: 48, height: 48, objectFit: 'cover' }} />
+                          ) : (
+                            <div className='bg-neutral-200 radius-4 d-flex justify-content-center align-items-center text-neutral-500 flex-shrink-0' style={{ width: 48, height: 48 }}>
+                              <Icon icon='mdi:food-apple' width='24' height='24' />
+                            </div>
+                          )}
+
+                          <div className='flex-grow-1 overflow-hidden'>
+                            <div className='d-flex align-items-center justify-content-between gap-8 mb-4'>
+                              <div className='d-flex align-items-center gap-8'>
+                                <span className='bg-primary-focus text-primary-main px-8 py-2 radius-4 fw-medium text-xs'>
+                                  {MEAL_TYPE_LABELS[item.meal_type] || item.meal_type}
+                                </span>
+                                <h6 className='text-sm fw-medium mb-0 text-truncate text-primary-light' style={{ maxWidth: '160px' }}>{item.item_text}</h6>
+                              </div>
+                              <span className='text-xs fw-medium text-neutral-500 whitespace-nowrap'>{item.quantity || 100}{item.unit || 'g'}</span>
+                            </div>
+
+                            {hasNutritionInfo ? (
+                              <div className='d-flex align-items-center gap-8 flex-wrap mt-8'>
+                                <span className='text-xs text-primary-main bg-primary-50 px-6 py-2 radius-4 fw-medium'>
+                                  {Math.round((parseFloat(item.calories) || 0) * qttyMultiplier)} kcal
+                                </span>
+                                {item.proteins !== null && <span className='text-xs text-neutral-500'>P: {Math.round((parseFloat(item.proteins) || 0) * qttyMultiplier)}g</span>}
+                                {item.carbohydrates !== null && <span className='text-xs text-neutral-500'>G: {Math.round((parseFloat(item.carbohydrates) || 0) * qttyMultiplier)}g</span>}
+                                {item.fats !== null && <span className='text-xs text-neutral-500'>L: {Math.round((parseFloat(item.fats) || 0) * qttyMultiplier)}g</span>}
+                              </div>
+                            ) : (
+                              <div className='mt-8'>
+                                <span className='text-xs text-neutral-400 fst-italic'>Aucune donnée nutritionnelle</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   </>
                 )}
+
               </div>
               <div className='modal-footer border-top px-24 py-16'>
                 <button onClick={() => openEdit(showDetail)}
@@ -444,17 +516,54 @@ const DailyDietLayer = ({ userId }) => {
                   </div>
                   <div className='d-flex flex-column gap-8'>
                     {form.items.map((item, idx) => (
-                      <div key={idx} className='d-flex align-items-center gap-8'>
-                        <select className='form-select radius-8' style={{ maxWidth: 140 }}
-                          value={item.meal_type} onChange={e => updateItem(idx, 'meal_type', e.target.value)}>
-                          {MEAL_TYPES.map(mt => <option key={mt} value={mt}>{MEAL_TYPE_LABELS[mt]}</option>)}
-                        </select>
-                        <input type='text' className='form-control radius-8 flex-grow-1' placeholder='Aliment...'
-                          value={item.item_text} onChange={e => updateItem(idx, 'item_text', e.target.value)} />
-                        <button type='button' onClick={() => removeItem(idx)}
-                          className='w-32-px h-32-px d-inline-flex justify-content-center align-items-center bg-danger-100 text-danger-600 bg-hover-danger-600 text-hover-white text-md rounded-circle flex-shrink-0'>
-                          <Icon icon='mdi:close' />
-                        </button>
+                      <div key={idx} className='d-flex flex-column gap-8 mb-16 p-16 bg-neutral-50 radius-8 border border-neutral-200'>
+                        <div className='d-flex align-items-center justify-content-between gap-12'>
+                          <div className='d-flex align-items-center gap-8 flex-grow-1'>
+                            <select className='form-select radius-8 bg-white' style={{ maxWidth: 140 }}
+                              value={item.meal_type} onChange={e => updateItem(idx, 'meal_type', e.target.value)}>
+                              {MEAL_TYPES.map(mt => <option key={mt} value={mt}>{MEAL_TYPE_LABELS[mt]}</option>)}
+                            </select>
+                            <div className='flex-grow-1 position-relative'>
+                              <FoodSearchAutocomplete
+                                value={item.item_text}
+                                onChange={(val) => updateItem(idx, 'item_text', val)}
+                                onSelect={(product) => handleFoodSelect(idx, product)}
+                              />
+                            </div>
+                          </div>
+                          <button type='button' onClick={() => removeItem(idx)}
+                            className='w-32-px h-32-px d-inline-flex justify-content-center align-items-center bg-danger-100 text-danger-600 bg-hover-danger-600 text-hover-white text-md rounded-circle flex-shrink-0'>
+                            <Icon icon='mdi:close' />
+                          </button>
+                        </div>
+
+                        {/* Nutrition inputs for the selected item */}
+                        <div className='d-flex align-items-center gap-12 flex-wrap'>
+                          <div className='d-flex align-items-center gap-4 bg-white px-8 py-4 radius-4 border'>
+                            <input type="number" className="form-control form-control-sm border-0 bg-transparent text-end p-0" style={{width: 50}} value={item.quantity || ''} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
+                            <select className="form-select form-select-sm border-0 bg-transparent p-0 text-primary-light" style={{width: 40, paddingRight: '20px!important', backgroundPosition: 'right 0.2rem center'}} value={item.unit || 'g'} onChange={e => updateItem(idx, 'unit', e.target.value)}>
+                              <option value="g">g</option>
+                              <option value="ml">ml</option>
+                              <option value="unité">u</option>
+                            </select>
+                          </div>
+                          <div className='d-flex align-items-center gap-4 bg-white px-8 py-4 radius-4 border'>
+                            <span className="text-xs text-primary-light">Kcal:</span>
+                            <input type="number" className="form-control form-control-sm border-0 bg-transparent text-end p-0" style={{width: 40}} value={item.calories || ''} onChange={e => updateItem(idx, 'calories', e.target.value)} placeholder="0" />
+                          </div>
+                          <div className='d-flex align-items-center gap-4 bg-white px-8 py-4 radius-4 border'>
+                            <span className="text-xs text-neutral-500">P:</span>
+                            <input type="number" className="form-control form-control-sm border-0 bg-transparent text-end p-0" style={{width: 30}} value={item.proteins || ''} onChange={e => updateItem(idx, 'proteins', e.target.value)} placeholder="0" />
+                          </div>
+                          <div className='d-flex align-items-center gap-4 bg-white px-8 py-4 radius-4 border'>
+                            <span className="text-xs text-neutral-500">G:</span>
+                            <input type="number" className="form-control form-control-sm border-0 bg-transparent text-end p-0" style={{width: 30}} value={item.carbohydrates || ''} onChange={e => updateItem(idx, 'carbohydrates', e.target.value)} placeholder="0" />
+                          </div>
+                          <div className='d-flex align-items-center gap-4 bg-white px-8 py-4 radius-4 border'>
+                            <span className="text-xs text-neutral-500">L:</span>
+                            <input type="number" className="form-control form-control-sm border-0 bg-transparent text-end p-0" style={{width: 30}} value={item.fats || ''} onChange={e => updateItem(idx, 'fats', e.target.value)} placeholder="0" />
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -223,7 +223,7 @@ app.get('/api/health/daily-diet', async (req, res) => {
     const query = `
       SELECT d.*, 
         COALESCE(json_agg(
-          json_build_object('id', di.id, 'meal_type', di.meal_type, 'item_text', di.item_text, 'sort_order', di.sort_order)
+          json_build_object('id', di.id, 'meal_type', di.meal_type, 'item_text', di.item_text, 'sort_order', di.sort_order, 'product_id', di.product_id, 'image_url', di.image_url, 'calories', di.calories, 'proteins', di.proteins, 'carbohydrates', di.carbohydrates, 'fats', di.fats, 'quantity', di.quantity, 'unit', di.unit)
         ) FILTER (WHERE di.id IS NOT NULL), '[]') as items
       FROM daily_diet d
       LEFT JOIN diet_items di ON di.daily_diet_id = d.id
@@ -263,11 +263,19 @@ app.post('/api/health/daily-diet', async (req, res) => {
       const mealTypes = items.map(item => item.meal_type);
       const itemTexts = items.map(item => item.item_text);
       const sortOrders = items.map(item => item.sort_order || 0);
+      const productIds = items.map(item => item.product_id || null);
+      const imageUrls = items.map(item => item.image_url || null);
+      const calories = items.map(item => item.calories || null);
+      const proteins = items.map(item => item.proteins || null);
+      const carbohydrates = items.map(item => item.carbohydrates || null);
+      const fats = items.map(item => item.fats || null);
+      const quantities = items.map(item => item.quantity || 100);
+      const units = items.map(item => item.unit || 'g');
 
       await client.query(
-        `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order)
-         SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[])`,
-        [dietId, mealTypes, itemTexts, sortOrders]
+        `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order, product_id, image_url, calories, proteins, carbohydrates, fats, quantity, unit)
+         SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[], $5::text[], $6::text[], $7::numeric[], $8::numeric[], $9::numeric[], $10::numeric[], $11::numeric[], $12::text[])`,
+        [dietId, mealTypes, itemTexts, sortOrders, productIds, imageUrls, calories, proteins, carbohydrates, fats, quantities, units]
       );
     }
 
@@ -308,11 +316,19 @@ app.put('/api/health/daily-diet/:id', async (req, res) => {
         const mealTypes = items.map(item => item.meal_type);
         const itemTexts = items.map(item => item.item_text);
         const sortOrders = items.map(item => item.sort_order || 0);
+        const productIds = items.map(item => item.product_id || null);
+        const imageUrls = items.map(item => item.image_url || null);
+        const calories = items.map(item => item.calories || null);
+        const proteins = items.map(item => item.proteins || null);
+        const carbohydrates = items.map(item => item.carbohydrates || null);
+        const fats = items.map(item => item.fats || null);
+        const quantities = items.map(item => item.quantity || 100);
+        const units = items.map(item => item.unit || 'g');
 
         await client.query(
-          `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order)
-           SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[])`,
-          [req.params.id, mealTypes, itemTexts, sortOrders]
+          `INSERT INTO diet_items (daily_diet_id, meal_type, item_text, sort_order, product_id, image_url, calories, proteins, carbohydrates, fats, quantity, unit)
+           SELECT $1, * FROM UNNEST($2::text[], $3::text[], $4::integer[], $5::text[], $6::text[], $7::numeric[], $8::numeric[], $9::numeric[], $10::numeric[], $11::numeric[], $12::text[])`,
+          [req.params.id, mealTypes, itemTexts, sortOrders, productIds, imageUrls, calories, proteins, carbohydrates, fats, quantities, units]
         );
       }
     }
